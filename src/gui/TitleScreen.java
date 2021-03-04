@@ -1,5 +1,7 @@
 package gui;
 
+import java.awt.event.KeyEvent;
+
 import main.GameObject;
 import music.MusicPlayer;
 import pumkins.*;
@@ -11,6 +13,8 @@ public class TitleScreen extends GameObject {
 	public static Sprite text = new Sprite ("resources/backgrounds/title_screen_text.png");
 	public static Sprite gameplay = new Sprite ("resources/backgrounds/gameplay.png");
 	
+	public static MapScreen mps = new MapScreen ();
+	
 	public TitleScreen () {
 		setSprite (bg);
 	}
@@ -19,7 +23,7 @@ public class TitleScreen extends GameObject {
 	public void frameEvent () {
 		if (mouseClicked () && getSprite () == bg) {
 			setSprite (gameplay);
-			MusicPlayer.playSong ("resources/sounds/gameplay.wav");
+			mps.declare (0, 0);
 			for (int i = 0; i < 6; i++) {
 				new RedPumkin ().declare (16, 32 + i * 8);
 				new OrangePumkin ().declare (24, 32 + i * 8);

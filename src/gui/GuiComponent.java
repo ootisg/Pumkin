@@ -19,8 +19,6 @@ public abstract class GuiComponent extends GameObject {
 			this.setSprite (background);
 		}
 		focus = false;
-		this.textInterface = new TextInterface (getSprites ().textSheet);
-		this.textInterface.setTextColorARGB (0xFFFFFFFF);
 		this.setPersistent (true);
 	}
 	public void focus () {
