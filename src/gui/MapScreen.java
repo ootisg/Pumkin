@@ -56,7 +56,7 @@ public class MapScreen extends GameObject {
 	public void frameEvent () {
 		
 		//Handle dragging the screen
-		if (keyCheck (KeyEvent.VK_SHIFT)) {
+		if (keyCheck (KeyEvent.VK_SHIFT) && mouseButtonDown (1)) {
 			if (mousePrev == null) {
 				//If dragging just started
 				mousePrev = new Point (getMouseX (), getMouseY ());

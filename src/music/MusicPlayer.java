@@ -49,20 +49,22 @@ public class MusicPlayer extends GameObject {
 		System.out.println (roomName);
 		
 		//Get the params for the current map
-		JSONObject mapParams = music_params.getJSONObject (roomName);
-		String musicPath = null;
-		Integer delayTime = null;
-		if (mapParams != null) {
-			musicPath = mapParams.getString ("path");
-			delayTime = (Integer)mapParams.get ("delay");
-		}
-		
-		//Play the song
-		if (musicPath != null) {
-			if (delayTime != null) {
-				playSongDelayed (musicPath, delayTime);
-			} else {
-				playSong (musicPath);
+		if (music_params != null) {
+			JSONObject mapParams = music_params.getJSONObject (roomName);
+			String musicPath = null;
+			Integer delayTime = null;
+			if (mapParams != null) {
+				musicPath = mapParams.getString ("path");
+				delayTime = (Integer)mapParams.get ("delay");
+			}
+			
+			//Play the song
+			if (musicPath != null) {
+				if (delayTime != null) {
+					playSongDelayed (musicPath, delayTime);
+				} else {
+					playSong (musicPath);
+				}
 			}
 		}
 		
@@ -73,8 +75,7 @@ public class MusicPlayer extends GameObject {
 			try {
 				music_params = JSONUtil.loadJSONFile (config_path);
 			} catch (JSONException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
+				//Do nothing
 			}
 		}
 	}

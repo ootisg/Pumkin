@@ -1,5 +1,7 @@
 package main;
 
+import java.io.FileNotFoundException;
+
 import gameObjects.GlobalSave;
 import gui.TitleScreen;
 import music.MusicPlayer;
@@ -15,6 +17,14 @@ public class GameCode extends GameAPI {
 		new MusicPlayer ();
 		MainLoop.getWindow ().setResolution (256, 144);
 		MainLoop.getWindow ().setSize (1024, 576);
+		
+		//Load the room
+		try {
+			getRoom ().loadRMF ("resources/maps/map_1.rmf");
+		} catch (FileNotFoundException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 		
 		//Start up the title screen
 		new TitleScreen ().declare (0, 0);

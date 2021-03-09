@@ -60,6 +60,15 @@ public abstract class GameAPI {
 		}
 		return true;
 	}
+	public boolean mouseButtonDown (int button) {
+		return MainLoop.getWindow ().getMouseInputImage ().buttonDown (button);
+	}
+	public boolean mouseButtonReleased (int button) {
+		return MainLoop.getWindow ().getMouseInputImage ().buttonReleased (button);
+	}
+	public boolean mouseButtonClicked (int button) {
+		return MainLoop.getWindow ().getMouseInputImage ().buttonClicked (button);
+	}
 	public static Room getRoom () {
 		return room;
 	}

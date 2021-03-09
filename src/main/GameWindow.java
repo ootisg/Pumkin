@@ -38,7 +38,7 @@ public class GameWindow extends JFrame {
 	public boolean[] keysReleasedOnFrameCache;
 	public boolean cacheMode;
 	ExtendedMouseListener mouseListener;
-	ExtendedMouseMotionListener motionListener;
+	ExtendedMouseListener.MouseInputImage mouseInputImage;
 	BufferedImage bufferImage;
 	BufferedImage rasterImage;
 	BufferedImage consoleImage;
@@ -49,7 +49,6 @@ public class GameWindow extends JFrame {
 	int numtest = 0;
 	int rasterMode = 0;
 	int[] resolution = {640, 480};
-	int[] mouseCoords = null;
 	int[] imageData = new int[640 * 480];
 	public static final int NO_RASTER = 0;
 	public static final int RASTER_ONLY = 1;
@@ -102,9 +101,9 @@ public class GameWindow extends JFrame {
 		this.setSize (640 + insets.left + insets.right, 480 + insets.top + insets.bottom); //Sets the size of the window to get a useable size of 640x480
 		this.setVisible (true); //Makes the window visible
 		mouseListener = new ExtendedMouseListener (insets.left, insets.top); //Makes a mouse listener
-		motionListener = new ExtendedMouseMotionListener (insets.left, insets.top); //Makes a mouse motion listener
+		mouseInputImage = mouseListener.getMouseInputImage ();
 		this.addMouseListener (mouseListener);
-		this.addMouseMotionListener (motionListener);
+		this.addMouseMotionListener (mouseListener);
 		self = this;
 		//This section handles keystroke detection
 		KeyboardFocusManager keyboardFocusManager = KeyboardFocusManager.getCurrentKeyboardFocusManager ();
@@ -160,14 +159,17 @@ public class GameWindow extends JFrame {
 	}
 	public void updateClick () {
 		//This method updates click information
-		mouseCoords = mouseListener.getClick ();
-		if (motionListener.getClicked ()) {
-			mouseCoords = motionListener.getMouseCoords ();
-		}
+		mouseInputImage = mouseListener.getMouseInputImage ();
+		mouseListener.startFrameUpdate ();
 	}
 	public int[] getClick () {
 		//Returns the coordinates of the last click, or null if there wasn't a click this frame
-		return mouseCoords;
+		for (int i = 1; i < 4; i++) {
+			if (mouseInputImage.buttonClicked (i)) {
+				return mouseInputImage.getMouseCoords ();
+			}
+		}
+		return null;
 	}
 	public void doPaint () {
 		//Refreshes the screen
@@ -245,6 +247,9 @@ public class GameWindow extends JFrame {
 			return false;
 		}
 	}
+	public ExtendedMouseListener.MouseInputImage getMouseInputImage () {
+		return mouseInputImage;
+	}
 	public Graphics getBufferGraphics () {
 		return bufferGraphics;
 	}
@@ -255,10 +260,10 @@ public class GameWindow extends JFrame {
 		return resolution;
 	}
 	public int getMouseX () {
-		return (int) (motionListener.getMouseCoords ()[0] * ((double) this.getResolution ()[0] / (this.getWidth () - insets.left - insets.right)));
+		return (int) (mouseInputImage.getMouseCoords ()[0] * ((double) this.getResolution ()[0] / (this.getWidth () - insets.left - insets.right)));
 	}
 	public int getMouseY () {
-		return (int) (motionListener.getMouseCoords ()[1] * ((double) this.getResolution ()[1] / (this.getHeight () - insets.top - insets.bottom)));
+		return (int) (mouseInputImage.getMouseCoords ()[1] * ((double) this.getResolution ()[1] / (this.getHeight () - insets.top - insets.bottom)));
 	}
 	public void setResolution (int width, int height) {
 		int[] usedResolution = {width, height};

@@ -4,7 +4,6 @@ import java.awt.Toolkit;
 
 import gui.Gui;
 import resources.ResourceLoader;
-import resources.SpriteContainer;
 
 public class MainLoop {
 	//Main class
