@@ -1,6 +1,8 @@
 package pumkins;
 
 import java.awt.Color;
+import java.awt.Graphics;
+import java.awt.Point;
 import java.util.ArrayList;
 import java.util.Vector;
 
@@ -10,6 +12,11 @@ import util.Vector2D;
 import visualEffects.ParticleMaker;
 
 public class Pumkin extends GameObject {
+	
+	public static final int PUMKIN_AI_IDLE = 0;
+	public static final int PUMKIN_AI_FOLLOW_PLAYER = 1;
+	public static final int PUMKIN_AI_FOLLOW_POINT = 2;
+	public static final int PUMKIN_AI_RUN_BETWEEN = 3;
 	
 	public static final double PUMKIN_DEFAULT_SPEED = 1;
 	public static final double PUMKIN_GROUP_STRENGTH = .05;
@@ -21,6 +28,15 @@ public class Pumkin extends GameObject {
 	private double speed;
 	
 	private ParticleMaker bodyParticle;
+	
+	private int currentAi;
+	private double destX;
+	private double destY;
+	private double fromX;
+	private double fromY;
+	private boolean towardsDest;
+	
+	Vector2D scratch = new Vector2D (0, 0);
 	
 	public Pumkin () {
 		setParticleMaker (getDefaultPumkinParticleMaker ());
@@ -37,6 +53,7 @@ public class Pumkin extends GameObject {
 		pm.setSpeed (.25);
 		pm.setMinSize (1);
 		pm.setMaxSize (2);
+		goBetween (25, 25, 200, 100);
 		return pm;
 	}
 	
@@ -58,14 +75,50 @@ public class Pumkin extends GameObject {
 
 	@Override
 	public void frameEvent () {
-		double mouseX = getMouseX ();
-		double mouseY = getMouseY ();
-		Vector2D disp = new Vector2D (mouseX - getX (), mouseY - getY ());
-		if (disp.getLength () > PUMKIN_STOP_DISTANCE) {
-			disp.normalize ();
-			disp.scale (speed);
-			setX (getX () + disp.x);
-			setY (getY () + disp.y);
+		doAIStep ();
+	}
+	
+	public void doAIStep () {
+		switch (currentAi) {
+			case PUMKIN_AI_IDLE:
+				//Do nothing
+				break;
+			case PUMKIN_AI_FOLLOW_PLAYER:
+				followAIStep (getMouseX (), getMouseY ());
+				break;
+			case PUMKIN_AI_FOLLOW_POINT:
+				followAIStep (destX, destY);
+				break;
+			case PUMKIN_AI_RUN_BETWEEN:
+				if (towardsDest) {
+					followAIStep (destX, destY);
+				} else {
+					followAIStep (fromX, fromY);
+				}
+				double x1 = getX ();
+				double y1 = getY ();
+				double x2 = towardsDest ? destX : fromX;
+				double y2 = towardsDest ? destY : fromY;
+				double distx = x2 - x1;
+				double disty = y2 - y1;
+				double dist = Math.sqrt (distx * distx + disty * disty);
+				if (dist < 32) {
+					towardsDest = !towardsDest;
+				}
+				break;
+			default:
+				break;
+		}
+	}
+	
+	public void followAIStep (double x, double y) {
+		scratch.x = x - getX ();
+		scratch.y = y - getY ();
+		if (scratch.getLength () > PUMKIN_STOP_DISTANCE) {
+			scratch.normalize ();
+			scratch.scale (speed);
+			setX (getX () + scratch.x);
+			setY (getY () + scratch.y);
 		}
 		ArrayList<GameObject> pumks = MainLoop.getObjectMatrix ().getAll (Pumkin.class);
 		for (int i = 0; i < pumks.size (); i++) {
@@ -89,9 +142,39 @@ public class Pumkin extends GameObject {
 		}
 	}
 	
+	public void idle () {
+		currentAi = PUMKIN_AI_IDLE;
+	}
+	
+	public void followPlayer () {
+		currentAi = PUMKIN_AI_FOLLOW_PLAYER;
+	}
+	
+	public void gotoPoint (double x, double y) {
+		currentAi = PUMKIN_AI_FOLLOW_POINT;
+		destX = x;
+		destY = y;
+	}
+	
+	public void goBetween (double xfrom, double yfrom, double xto, double yto) {
+		currentAi = PUMKIN_AI_RUN_BETWEEN;
+		destX = xto;
+		destY = yto;
+		fromX = xfrom;
+		fromY = yfrom;
+		towardsDest = true;
+	}
+	
+	public void reverse () {
+		towardsDest = !towardsDest;
+	}
+	
 	@Override
 	public void draw () {
 		bodyParticle.makeParticle ((int)getX (), (int)getY ());
+		Graphics g = MainLoop.getWindow ().getBufferGraphics ();
+		g.setColor (Color.BLACK);
+		g.fillRect ((int)getX (), (int)getY (), 2, 2);
 	}
 	
 }

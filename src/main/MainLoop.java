@@ -15,6 +15,7 @@ public class MainLoop {
 	private static boolean running = true; //Currently unused
 	private static long startTime;
 	private static long delay; //Used for loop timing
+	private static int frameCount = 0;
 	private static boolean paused; //If the game is paused
 	public static boolean freezeFrame = false; //Whether to freeze on the current frame
 	public static boolean advanceFrame = false; //Whether to advance the current frame
@@ -45,6 +46,7 @@ public class MainLoop {
 			gameWindow.clearKeyArrays (); //Resets keystroke events that only fire for 1 frame
 			gameWindow.inputCacheMode (false);
 			gameWindow.doPaint (); //Refreshes the game window
+			frameCount++;
 		}
 		catch (Throwable e) {
 			//Displays the console if an error occurs, and print out information usable for debugging
@@ -111,5 +113,8 @@ public class MainLoop {
 	}
 	public static void advanceFrame () {
 		advanceFrame = true;
+	}
+	public static int getFrameCount () {
+		return frameCount;
 	}
 }

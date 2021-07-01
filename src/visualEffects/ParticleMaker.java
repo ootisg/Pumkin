@@ -1,6 +1,7 @@
 package visualEffects;
 
 import java.awt.Color;
+import java.util.HashMap;
 
 import gameObjects.Particle;
 
@@ -17,6 +18,7 @@ public class ParticleMaker {
 	private Color color1 = new Color (0x000000);
 	private Color color2 = new Color (0x000000);
 	private boolean useWhilePaused = false;
+	private HashMap<Integer, Color> colors = new HashMap<Integer, Color> ();
 	
 	public Particle makeParticle (int x, int y) {
 		
@@ -33,10 +35,17 @@ public class ParticleMaker {
 		int green = randomBetweenInt (color1.getGreen (), color2.getGreen ());
 		int blue = randomBetweenInt (color1.getBlue (), color2.getBlue ());
 		int alpha = randomBetweenInt (color1.getAlpha (), color2.getAlpha ());
-		Color color = new Color (red, green, blue, alpha);
+		int colorInt = (alpha << 24) + (red << 16) + (green << 8) + blue;
+		Color color;
+		if (colors.containsKey (colorInt)) {
+			color = colors.get (colorInt);
+		} else {
+			color = new Color (red, green, blue, alpha);
+			colors.put (colorInt, color);
+		}
 		
 		//Generate the particle
-		Particle p = new Particle (x, y, color, size, life, ang, speed);
+		Particle p = Particle.makeParticle (x, y, color, size, life, ang, speed);
 		p.setIgnorePause (useWhilePaused);
 		return p;
 		

@@ -1,17 +1,29 @@
 package gui;
 
-import java.awt.Color;
-import java.awt.event.KeyEvent;
-import java.awt.image.BufferedImage;
+import java.util.HashMap;
 
-import gameObjects.GlobalSave;
 import main.GameObject;
-import main.GameWindow;
-import main.MainLoop;
-import main.TextInterface;
-import resources.Sprite;
-import resources.Spritesheet;
 
 public class Gui extends GameObject {
 
+	public HashMap<String, GuiComponent> components;
+	
+	public Gui () {
+		components = new HashMap<String, GuiComponent> ();
+	}
+	
+	public void addComponent (GuiComponent c) {
+		String cid = c.getComponentId ();
+		components.put (cid, c);
+		c.declare (0, 0);
+	}
+	
+	public void frameEvent () {
+		
+	}
+	
+	public void draw () {
+		
+	}
+	
 }

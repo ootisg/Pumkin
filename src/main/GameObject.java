@@ -10,7 +10,7 @@ public abstract class GameObject extends GameAPI implements Comparable<GameObjec
 	private Variant variant = new Variant ("");
 	private double x;
 	private double y;
-	private double[] startPos;
+	private double[] startPos = new double[2];
 	private double xprevious;
 	private double yprevious;
 	private int hitboxXOffset;
@@ -33,7 +33,8 @@ public abstract class GameObject extends GameAPI implements Comparable<GameObjec
 		orderingNumber = MainLoop.getObjectMatrix ().getNextOrderNumber ();
 		this.x = x;
 		this.y = y;
-		this.startPos = new double[] {x, y};
+		startPos[0] = x;
+		startPos[1] = y;
 		xprevious = x;
 		yprevious = y;
 		hidden = false;

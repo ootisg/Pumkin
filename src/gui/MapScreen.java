@@ -14,7 +14,7 @@ import main.GameObject;
 import main.MainLoop;
 import resources.Sprite;
 
-public class MapScreen extends GameObject {
+public class MapScreen extends GuiComponent {
 
 	private Point mousePrev = null;
 	
@@ -90,7 +90,6 @@ public class MapScreen extends GameObject {
 		if (mouseClicked ()) {
 			int cellX = (getMouseX () + scrollX) / CELL_SIZE;
 			int cellY = (getMouseY () + scrollY) / CELL_SIZE;
-			System.out.println (cellX + ", " + cellY);
 		}
 		
 	}
@@ -132,6 +131,11 @@ public class MapScreen extends GameObject {
 		Graphics wg = MainLoop.getWindow ().getBufferGraphics ();
 		wg.drawImage (renderImg, 0, 0, null);
 		
+	}
+
+	@Override
+	public String getComponentId () {
+		return "map_screen";
 	}
 	
 }

@@ -3,6 +3,7 @@ package main;
 import java.io.FileNotFoundException;
 
 import gameObjects.GlobalSave;
+import gui.MapScreen;
 import gui.TitleScreen;
 import music.MusicPlayer;
 
@@ -18,6 +19,9 @@ public class GameCode extends GameAPI {
 		MainLoop.getWindow ().setResolution (256, 144);
 		MainLoop.getWindow ().setSize (1024, 576);
 		
+		//Make the gui components
+		getGui ().addComponent (new TitleScreen ());
+		
 		//Load the room
 		try {
 			getRoom ().loadRMF ("resources/maps/map_1.rmf");
@@ -31,6 +35,7 @@ public class GameCode extends GameAPI {
 		
 	}
 	public void gameLoop () {
+		getRoom ().frameEvent ();
 		//Saveable.printSaves ();
 		//Runs once per frame
 	}

@@ -25,6 +25,8 @@ import resources.Spritesheet;
 
 public class Room {
 	
+	public static int TILE_SOURCE_SIZE = 16;
+	public static int TILE_SIZE = 8;
 	public static final int MAX_COLLISION_STEPS = 1000;
 	
 	private String roomName;
@@ -110,7 +112,7 @@ public class Room {
 		return false;
 	}
 	public double[] getCollidingCoords (double x1, double y1, double x2, double y2) {
-		if (x1 < 0 || x1 > levelWidth * 16 || x2 < 0 || x2 > levelWidth * 16 || y1 < 0 || y1 > levelHeight * 16 || y2 < 0 || y2 > levelHeight * 16) {
+		if (x1 < 0 || x1 > levelWidth * TILE_SIZE || x2 < 0 || x2 > levelWidth * TILE_SIZE || y1 < 0 || y1 > levelHeight * TILE_SIZE || y2 < 0 || y2 > levelHeight * TILE_SIZE) {
 			return null;
 		}
 		int xdir = 1;
@@ -129,7 +131,7 @@ public class Room {
 		if (y1 > y2) {
 			ydir = -1;
 		}
-		if (collisionData [getTileId ((int) x1 / 16, (int) y1 / 16)]) {
+		if (collisionData [getTileId ((int) x1 / TILE_SIZE, (int) y1 / TILE_SIZE)]) {
 			return new double[] {x1, y1};
 		}
 		int steps;
@@ -137,14 +139,14 @@ public class Room {
 			steps = 0;
 			while (steps < MAX_COLLISION_STEPS) {
 				tileYOffset = 0;
-				ystep = snap16 (ystep, ydir);
-				if (ydir == -1 && ystep % 16 == 0) {
+				ystep = snapTile (ystep, ydir);
+				if (ydir == -1 && ystep % TILE_SIZE == 0) {
 					tileYOffset = -1;
 				}
 				if (!isBetween (ystep, y1, y2)) {
 					return null;
 				}
-				if (collisionData [getTileId ((int) x1 / 16, (int) ystep / 16 + tileYOffset)]) {
+				if (collisionData [getTileId ((int) x1 / TILE_SIZE, (int) ystep / TILE_SIZE + tileYOffset)]) {
 					return new double[] {x1, ystep};
 				}
 				steps ++;
@@ -155,14 +157,14 @@ public class Room {
 			steps = 0;
 			while (steps < MAX_COLLISION_STEPS) {
 				tileXOffset = 0;
-				xstep = snap16 (xstep, xdir);
-				if (xdir == -1 && xstep % 16 == 0) {
+				xstep = snapTile (xstep, xdir);
+				if (xdir == -1 && xstep % TILE_SIZE == 0) {
 					tileXOffset = -1;
 				}
 				if (!isBetween (xstep, x1, x2)) {
 					return null;
 				}
-				if (collisionData [getTileId ((int) x1 / 16 + tileXOffset, (int) ystep / 16)]) {
+				if (collisionData [getTileId ((int) x1 / TILE_SIZE + tileXOffset, (int) ystep / TILE_SIZE)]) {
 					return new double[] {xstep, y1};
 				}
 				steps ++;
@@ -174,9 +176,9 @@ public class Room {
 		while (steps < MAX_COLLISION_STEPS) {
 			tileXOffset = 0;
 			tileYOffset = 0;
-			xcheck1 = snap16 (xstep, xdir);
+			xcheck1 = snapTile (xstep, xdir);
 			ycheck1 = m * xcheck1 + b;
-			ycheck2 = snap16 (ystep, ydir);
+			ycheck2 = snapTile (ystep, ydir);
 			xcheck2 = (ycheck2 - b) / m;
 			if (Math.abs (x1 - xcheck1) > Math.abs (x1 - xcheck2)) {
 				double temp = xcheck1;
@@ -191,13 +193,13 @@ public class Room {
 			if (!isBetween (xstep, x1, x2) || !isBetween (ystep, y1, y2)) {
 				return null;
 			}
-			if (xdir == -1 && xstep % 16 == 0) {
+			if (xdir == -1 && xstep % TILE_SIZE == 0) {
 				tileXOffset = -1;
 			}
-			if (ydir == -1 && ystep % 16 == 0) {
+			if (ydir == -1 && ystep % TILE_SIZE == 0) {
 				tileYOffset = -1;
 			}
-			if (collisionData [getTileId ((int) xstep / 16 + tileXOffset, (int) ystep / 16 + tileYOffset)]) {
+			if (collisionData [getTileId ((int) xstep / TILE_SIZE + tileXOffset, (int) ystep / TILE_SIZE + tileYOffset)]) {
 				return new double[] {xstep, ystep};
 			}
 			steps ++;
@@ -209,27 +211,27 @@ public class Room {
 		int ydir = 1;
 		byte tileXOffset = 0;
 		byte tileYOffset = 0;
-		if (x1 >= x2 && x1 % 16 == 0) {
+		if (x1 >= x2 && x1 % TILE_SIZE == 0) {
 			xdir = -1;
 			tileXOffset = -1;
 		}
-		if (y1 >= y2 && y1 % 16 == 0) {
+		if (y1 >= y2 && y1 % TILE_SIZE == 0) {
 			ydir = -1;
 			tileYOffset = -1;
 		}
-		if (tileInBounds ((int)(x1 / 16 + tileXOffset), (int)(y1 / 16 + tileYOffset))) {
-			if (collisionData [getTileId ((int)(x1 / 16 + tileXOffset), (int)(y1 / 16 + tileYOffset))] == true) {
+		if (tileInBounds ((int)(x1 / TILE_SIZE + tileXOffset), (int)(y1 / TILE_SIZE + tileYOffset))) {
+			if (collisionData [getTileId ((int)(x1 / TILE_SIZE + tileXOffset), (int)(y1 / TILE_SIZE + tileYOffset))] == true) {
 				tileBuffer.enabled = true;
 				tileBuffer.collisionX = x1;
 				tileBuffer.collisionY = y1;
-				tileBuffer.spriteUsed = tileList [getTileId ((int)(x1 / 16), (int)(y1 / 16))];
-				tileBuffer.mapTile.tileId = tileIdList [getTileId ((int)(x1 / 16), (int)(y1 / 16))];
-				tileBuffer.mapTile.x = (int) x1 / 16;
-				tileBuffer.mapTile.y = (int) y1 / 16;
+				tileBuffer.spriteUsed = tileList [getTileId ((int)(x1 / TILE_SIZE), (int)(y1 / TILE_SIZE))];
+				tileBuffer.mapTile.tileId = tileIdList [getTileId ((int)(x1 / TILE_SIZE), (int)(y1 / TILE_SIZE))];
+				tileBuffer.mapTile.x = (int) x1 / TILE_SIZE;
+				tileBuffer.mapTile.y = (int) y1 / TILE_SIZE;
 				return;
 			}
 		}
-		if ((x1 < 0 && x2 < 0) || (x1 > levelWidth * 16 && x2 > levelWidth * 16) || (y1 < 0 && y2 < 0) || (y1 > levelWidth * 16 && y2 > levelWidth * 16)) {
+		if ((x1 < 0 && x2 < 0) || (x1 > levelWidth * TILE_SIZE && x2 > levelWidth * TILE_SIZE) || (y1 < 0 && y2 < 0) || (y1 > levelWidth * TILE_SIZE && y2 > levelWidth * TILE_SIZE)) {
 			tileBuffer.enabled = false;
 			return;
 		} else {
@@ -241,10 +243,10 @@ public class Room {
 		double ycheck2 = 0;
 		double xstep = x1;
 		double ystep = y1;
-		/*if (collisionData [getTileId ((int) x1 / 16, (int) y1 / 16)]) {
+		/*if (collisionData [getTileId ((int) x1 / TILE_SIZE, (int) y1 / TILE_SIZE)]) {
 			tileBuffer.collisionX = x1;
 			tileBuffer.collisionY = y2;
-			tileBuffer.spriteUsed = tileList [getTileId ((int) x1 / 16, (int) y1 / 16)];
+			tileBuffer.spriteUsed = tileList [getTileId ((int) x1 / TILE_SIZE, (int) y1 / TILE_SIZE)];
 			return;
 		}*/
 		int steps;
@@ -252,17 +254,17 @@ public class Room {
 			steps = 0;
 			while (steps < MAX_COLLISION_STEPS) {
 				tileYOffset = 0;
-				ystep = snap16 (ystep, ydir);
-				if (ydir == -1 && ystep % 16 == 0) {
+				ystep = snapTile (ystep, ydir);
+				if (ydir == -1 && ystep % TILE_SIZE == 0) {
 					tileYOffset = -1;
 				}
 				if (!isBetween (ystep, y1, y2)) {
 					tileBuffer.enabled = false;
 					return;
 				}
-				int tileFinalX = (int) x1 / 16;
-				int tileFinalY = (int) ystep / 16 + tileYOffset;
-				if (x1 % 16 == 0) {
+				int tileFinalX = (int) x1 / TILE_SIZE;
+				int tileFinalY = (int) ystep / TILE_SIZE + tileYOffset;
+				if (x1 % TILE_SIZE == 0) {
 					if (tileFinalX <= 0 || tileFinalX >= levelWidth || tileFinalY < 0 || tileFinalY >= levelHeight) {
 						tileBuffer.enabled = false;
 						return;
@@ -270,10 +272,10 @@ public class Room {
 					if (collisionData [getTileId (tileFinalX, tileFinalY)] && collisionData [getTileId (tileFinalX - 1, tileFinalY)]) {
 						tileBuffer.collisionX = x1;
 						tileBuffer.collisionY = y2;
-						tileBuffer.spriteUsed = tileList [getTileId ((int) x1 / 16, (int) ystep / 16 + tileYOffset)];
-						tileBuffer.mapTile.tileId = tileIdList [getTileId ((int) x1 / 16, (int) ystep / 16 + tileYOffset)];
-						tileBuffer.mapTile.x = (int) x1 / 16;
-						tileBuffer.mapTile.y = (int) ystep / 16 + tileYOffset;
+						tileBuffer.spriteUsed = tileList [getTileId ((int) x1 / TILE_SIZE, (int) ystep / TILE_SIZE + tileYOffset)];
+						tileBuffer.mapTile.tileId = tileIdList [getTileId ((int) x1 / TILE_SIZE, (int) ystep / TILE_SIZE + tileYOffset)];
+						tileBuffer.mapTile.x = (int) x1 / TILE_SIZE;
+						tileBuffer.mapTile.y = (int) ystep / TILE_SIZE + tileYOffset;
 						return;
 					}
 				} else {
@@ -284,10 +286,10 @@ public class Room {
 					if (collisionData [getTileId (tileFinalX, tileFinalY)]) {
 						tileBuffer.collisionX = x1;
 						tileBuffer.collisionY = y2;
-						tileBuffer.spriteUsed = tileList [getTileId ((int) x1 / 16, (int) ystep / 16 + tileYOffset)];
-						tileBuffer.mapTile.tileId = tileIdList [getTileId ((int) x1 / 16, (int) ystep / 16 + tileYOffset)];
-						tileBuffer.mapTile.x = (int) x1 / 16;
-						tileBuffer.mapTile.y = (int) ystep / 16 + tileYOffset;
+						tileBuffer.spriteUsed = tileList [getTileId ((int) x1 / TILE_SIZE, (int) ystep / TILE_SIZE + tileYOffset)];
+						tileBuffer.mapTile.tileId = tileIdList [getTileId ((int) x1 / TILE_SIZE, (int) ystep / TILE_SIZE + tileYOffset)];
+						tileBuffer.mapTile.x = (int) x1 / TILE_SIZE;
+						tileBuffer.mapTile.y = (int) ystep / TILE_SIZE + tileYOffset;
 						return;
 					}
 				}
@@ -301,17 +303,17 @@ public class Room {
 			steps = 0;
 			while (steps < MAX_COLLISION_STEPS) {
 				tileXOffset = 0;
-				xstep = snap16 (xstep, xdir);
-				if (xdir == -1 && xstep % 16 == 0) {
+				xstep = snapTile (xstep, xdir);
+				if (xdir == -1 && xstep % TILE_SIZE == 0) {
 					tileXOffset = -1;
 				}
 				if (!isBetween (xstep, x1, x2)) {
 					tileBuffer.enabled = false;
 					return;
 				}
-				int tileFinalX = (int) x1 / 16 + tileXOffset;
-				int tileFinalY = (int) ystep / 16;
-				if (y1 % 16 == 0) {
+				int tileFinalX = (int) x1 / TILE_SIZE + tileXOffset;
+				int tileFinalY = (int) ystep / TILE_SIZE;
+				if (y1 % TILE_SIZE == 0) {
 					if (tileFinalX < 0 || tileFinalX >= levelWidth || tileFinalY <= 0 || tileFinalY >= levelHeight) {
 						tileBuffer.enabled = false;
 						return;
@@ -319,10 +321,10 @@ public class Room {
 					if (collisionData [getTileId (tileFinalX, tileFinalY)] && collisionData [getTileId (tileFinalX, tileFinalY - 1)]) {
 						tileBuffer.collisionX = xstep;
 						tileBuffer.collisionY = y1;
-						tileBuffer.spriteUsed = tileList [getTileId ((int) x1 / 16 + tileXOffset, (int) ystep / 16)];
-						tileBuffer.mapTile.tileId = tileIdList [getTileId ((int) x1 / 16 + tileXOffset, (int) ystep / 16)];
-						tileBuffer.mapTile.x = (int) x1 / 16 + tileXOffset;
-						tileBuffer.mapTile.y = (int) ystep / 16;
+						tileBuffer.spriteUsed = tileList [getTileId ((int) x1 / TILE_SIZE + tileXOffset, (int) ystep / TILE_SIZE)];
+						tileBuffer.mapTile.tileId = tileIdList [getTileId ((int) x1 / TILE_SIZE + tileXOffset, (int) ystep / TILE_SIZE)];
+						tileBuffer.mapTile.x = (int) x1 / TILE_SIZE + tileXOffset;
+						tileBuffer.mapTile.y = (int) ystep / TILE_SIZE;
 						return;
 					}
 				} else {
@@ -333,10 +335,10 @@ public class Room {
 					if (collisionData [getTileId (tileFinalX, tileFinalY)]) {
 						tileBuffer.collisionX = xstep;
 						tileBuffer.collisionY = y1;
-						tileBuffer.spriteUsed = tileList [getTileId ((int) x1 / 16 + tileXOffset, (int) ystep / 16)];
-						tileBuffer.mapTile.tileId = tileIdList [getTileId ((int) x1 / 16 + tileXOffset, (int) ystep / 16)];
-						tileBuffer.mapTile.x = (int) x1 / 16 + tileXOffset;
-						tileBuffer.mapTile.y = (int) ystep / 16;
+						tileBuffer.spriteUsed = tileList [getTileId ((int) x1 / TILE_SIZE + tileXOffset, (int) ystep / TILE_SIZE)];
+						tileBuffer.mapTile.tileId = tileIdList [getTileId ((int) x1 / TILE_SIZE + tileXOffset, (int) ystep / TILE_SIZE)];
+						tileBuffer.mapTile.x = (int) x1 / TILE_SIZE + tileXOffset;
+						tileBuffer.mapTile.y = (int) ystep / TILE_SIZE;
 						return;
 					}
 				}
@@ -349,9 +351,9 @@ public class Room {
 		while (steps < MAX_COLLISION_STEPS) {
 			tileXOffset = 0;
 			tileYOffset = 0;
-			xcheck1 = snap16 (xstep, xdir);
+			xcheck1 = snapTile (xstep, xdir);
 			ycheck1 = m * xcheck1 + b;
-			ycheck2 = snap16 (ystep, ydir);
+			ycheck2 = snapTile (ystep, ydir);
 			xcheck2 = (ycheck2 - b) / m;
 			if (Math.abs (x1 - xcheck1) > Math.abs (x1 - xcheck2)) {
 				double temp = xcheck1;
@@ -368,14 +370,14 @@ public class Room {
 				tileBuffer.enabled = false;
 				return;
 			}
-			if (xdir == -1 && xstep % 16 == 0) {
+			if (xdir == -1 && xstep % TILE_SIZE == 0) {
 				tileXOffset = -1;
 			}
-			if (ydir == -1 && ystep % 16 == 0) {
+			if (ydir == -1 && ystep % TILE_SIZE == 0) {
 				tileYOffset = -1;
 			}
-			int tileFinalX = (int) xstep / 16 + tileXOffset;
-			int tileFinalY = (int) ystep / 16 + tileYOffset;
+			int tileFinalX = (int) xstep / TILE_SIZE + tileXOffset;
+			int tileFinalY = (int) ystep / TILE_SIZE + tileYOffset;
 			if (tileFinalX < 0 || tileFinalX >= levelWidth || tileFinalY < 0 || tileFinalY >= levelHeight) {
 				tileBuffer.enabled = false;
 				return;
@@ -383,10 +385,10 @@ public class Room {
 			if (collisionData [getTileId (tileFinalX, tileFinalY)]) {
 				tileBuffer.collisionX = xstep;
 				tileBuffer.collisionY = ystep;
-				tileBuffer.spriteUsed = tileList [getTileId ((int) xstep / 16 + tileXOffset, (int) ystep / 16 + tileYOffset)];
-				tileBuffer.mapTile.tileId = tileIdList [getTileId ((int) xstep / 16 + tileXOffset, (int) ystep / 16 + tileYOffset)];
-				tileBuffer.mapTile.x = (int) xstep / 16 + tileXOffset;
-				tileBuffer.mapTile.y = (int) ystep / 16 + tileYOffset;
+				tileBuffer.spriteUsed = tileList [getTileId ((int) xstep / TILE_SIZE + tileXOffset, (int) ystep / TILE_SIZE + tileYOffset)];
+				tileBuffer.mapTile.tileId = tileIdList [getTileId ((int) xstep / TILE_SIZE + tileXOffset, (int) ystep / TILE_SIZE + tileYOffset)];
+				tileBuffer.mapTile.x = (int) xstep / TILE_SIZE + tileXOffset;
+				tileBuffer.mapTile.y = (int) ystep / TILE_SIZE + tileYOffset;
 				return;
 			}
 			steps ++;
@@ -417,18 +419,18 @@ public class Room {
 	public boolean[][] filter (int x, int y, int width, int height, String filter) {
 		return null;
 	}
-	public double snap16 (double num, int direction) {
-		if (num % 16 == 0) {
+	public double snapTile (double num, int direction) {
+		if (num % TILE_SIZE == 0) {
 			if (direction == 1) {
-				return num + 16;
+				return num + TILE_SIZE;
 			} else {
-				return num - 16;
+				return num - TILE_SIZE;
 			}
 		} else {
 			if (direction == 1) {
-				return Math.ceil (num / 16) * 16;
+				return Math.ceil (num / TILE_SIZE) * TILE_SIZE;
 			} else {
-				return Math.floor (num / 16) * 16;
+				return Math.floor (num / TILE_SIZE) * TILE_SIZE;
 			}
 		}
 	}
@@ -438,10 +440,10 @@ public class Room {
 		int y = hitbox.y;
 		int width = hitbox.width;
 		int height = hitbox.height;
-		int x1 = bind (x / 16, 0, levelWidth * 16);
-		int x2 = bind ((x + width) / 16, 0, levelWidth * 16);
-		int y1 = bind (y / 16, 0, levelHeight * 16);
-		int y2 = bind ((y + height) / 16, 0, levelHeight * 16);
+		int x1 = bind (x / TILE_SIZE, 0, levelWidth * TILE_SIZE);
+		int x2 = bind ((x + width) / TILE_SIZE, 0, levelWidth * TILE_SIZE);
+		int y1 = bind (y / TILE_SIZE, 0, levelHeight * TILE_SIZE);
+		int y2 = bind ((y + height) / TILE_SIZE, 0, levelHeight * TILE_SIZE);
 		for (int i = x1; i <= x2; i ++) {
 			for (int j = y1; j <= y2; j ++) {
 				if (collisionData [getTileId (i, j)] == true) {
@@ -457,10 +459,10 @@ public class Room {
 		int y = hitbox.y;
 		int width = hitbox.width;
 		int height = hitbox.height;
-		int x1 = bind (x / 16, 0, levelWidth * 16);
-		int x2 = bind ((x + width) / 16, 0, levelWidth * 16);
-		int y1 = bind (y / 16, 0, levelHeight * 16);
-		int y2 = bind ((y + height) / 16, 0, levelHeight * 16);
+		int x1 = bind (x / TILE_SIZE, 0, levelWidth * TILE_SIZE);
+		int x2 = bind ((x + width) / TILE_SIZE, 0, levelWidth * TILE_SIZE);
+		int y1 = bind (y / TILE_SIZE, 0, levelHeight * TILE_SIZE);
+		int y2 = bind ((y + height) / TILE_SIZE, 0, levelHeight * TILE_SIZE);
 		for (int i = x1; i <= x2; i ++) {
 			for (int j = y1; j <= y2; j ++) {
 				if (tileIdList [getTileId (i, j)].equals (tileId)) {
@@ -583,10 +585,10 @@ public class Room {
 		int y = hitbox.y;
 		int width = hitbox.width;
 		int height = hitbox.height;
-		int x1 = bind (x / 16, 0, levelWidth * 16);
-		int x2 = bind ((x + width) / 16, 0, levelWidth * 16);
-		int y1 = bind (y / 16, 0, levelHeight * 16);
-		int y2 = bind ((y + height) / 16, 0, levelHeight * 16);
+		int x1 = bind (x / TILE_SIZE, 0, levelWidth * TILE_SIZE);
+		int x2 = bind ((x + width) / TILE_SIZE, 0, levelWidth * TILE_SIZE);
+		int y1 = bind (y / TILE_SIZE, 0, levelHeight * TILE_SIZE);
+		int y2 = bind ((y + height) / TILE_SIZE, 0, levelHeight * TILE_SIZE);
 		boolean[][] result = new boolean [(x2 - x1 + 1)][(y2 - y1 + 1)];
 		for (int i = y1; i <= y2; i ++) {
 			for (int j = x1; j <= x2; j ++) {
@@ -601,10 +603,10 @@ public class Room {
 		int y = hitbox.y;
 		int width = hitbox.width;
 		int height = hitbox.height;
-		int x1 = bind (x / 16, 0, levelWidth * 16);
-		int x2 = bind ((x + width) / 16, 0, levelWidth * 16);
-		int y1 = bind (y / 16, 0, levelHeight * 16);
-		int y2 = bind ((y + height) / 16, 0, levelHeight * 16);
+		int x1 = bind (x / TILE_SIZE, 0, levelWidth * TILE_SIZE);
+		int x2 = bind ((x + width) / TILE_SIZE, 0, levelWidth * TILE_SIZE);
+		int y1 = bind (y / TILE_SIZE, 0, levelHeight * TILE_SIZE);
+		int y2 = bind ((y + height) / TILE_SIZE, 0, levelHeight * TILE_SIZE);
 		boolean[][] result = new boolean [(x2 - x1 + 1)][(y2 - y1 + 1)];
 		for (int i = y1; i <= y2; i ++) {
 			for (int j = x1; j <= x2; j ++) {
@@ -670,9 +672,9 @@ public class Room {
 			if (backgroundList.size () != 0 && backgroundList.get (layer) != null) {
 				backgroundList.get (layer).draw (viewX, viewY);
 			} else {
-				for (int i = -(viewX % 16); i < windowWidth && i < levelWidth * 16; i += 16) {
-					for (int j = (-viewY % 16); j < windowHeight && j < levelHeight * 16; j += 16) {
-						Sprite currTile = tileList [tileData [layer][(viewX + i) / 16][(viewY + j) / 16]];
+				for (int i = -(viewX % TILE_SIZE); i < windowWidth && i < levelWidth * TILE_SIZE; i += TILE_SIZE) {
+					for (int j = (-viewY % TILE_SIZE); j < windowHeight && j < levelHeight * TILE_SIZE; j += TILE_SIZE) {
+						Sprite currTile = tileList [tileData [layer][(viewX + i) / TILE_SIZE][(viewY + j) / TILE_SIZE]];
 						if (currTile != null) {
 							currTile.draw (i, j);
 						}
@@ -691,7 +693,7 @@ public class Room {
 		//Bytes 4-7: Map width, in tiles
 		//Bytes 8-11: Map height, in tiles
 		//Bytes 12-15: Number of layers
-		//Bytes 16-19: Number of objects (placed)
+		//Bytes TILE_SIZE-19: Number of objects (placed)
 		//END OF HEADER
 		//Tileset list (background layers are excluded)
 		//Object import list
@@ -758,8 +760,20 @@ public class Room {
 					tileList.add (null);
 					tileIdList.add ("_NULL");
 				} else {
+					
+					//Make the spritesheet
 					Spritesheet ss = new Spritesheet (tilesetArr[i]);
-					Sprite[] s = ss.toSpriteArray (16, 16);
+					double scale = (double)TILE_SIZE / TILE_SOURCE_SIZE;
+					int newWidth = (int)(ss.getWidth () * scale);
+					int newHeight = (int)(ss.getHeight () * scale);
+					
+					//Make the image
+					BufferedImage tileImg = new BufferedImage (newWidth, newHeight, BufferedImage.TYPE_INT_ARGB);
+					Graphics g = tileImg.getGraphics ();
+					g.drawImage (ss.getImage (), 0, 0, newWidth, newHeight, 0, 0, ss.getWidth (), ss.getHeight (), null);
+					Spritesheet newSheet = new Spritesheet (tileImg);
+					
+					Sprite[] s = newSheet.toSpriteArray (TILE_SIZE, TILE_SIZE);
 					//Add tiles into map
 					for (int j = 0; j < s.length; j++) {
 						tileList.add (s[j]);
@@ -851,7 +865,7 @@ public class Room {
 						}
 					}
 					//Declare the object
-					newObject.declare (objX * 16, objY * 16);
+					newObject.declare (objX * TILE_SIZE, objY * TILE_SIZE);
 				} catch (ClassNotFoundException | InstantiationException | IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
 					//Object is invalid and cannot be instantiated
 					System.out.println ("Error while loading room " + roomName + ": object with index " + i + " could not be instantiated");
@@ -910,9 +924,9 @@ public class Room {
 			}
 			int version = readBits (8); //For future use
 			int layerCount = readBits (8); //For future use
-			//resizeLevel (readBits (16), readBits (16));
-			levelWidth = readBits (16);
-			levelHeight = readBits (16);
+			//resizeLevel (readBits (TILE_SIZE), readBits (TILE_SIZE));
+			levelWidth = readBits (TILE_SIZE);
+			levelHeight = readBits (TILE_SIZE);
 			tileData = new short[layerCount][levelWidth][levelHeight];
 			for (int layer = 0; layer < layerCount; layer ++) {
 				for (int i = 0; i < levelWidth; i ++) {
@@ -921,7 +935,7 @@ public class Room {
 					}
 				}
 			}
-			int tilesUsedLength = readBits (16);
+			int tilesUsedLength = readBits (TILE_SIZE);
 			int objectsPlacedLength = readBits (32);
 			int tempReadBit = readBit;
 			int result = 0;
@@ -966,7 +980,7 @@ public class Room {
 			for (int i = 0; i < tilesetNameArray.length; i ++) {
 				//System.out.println("resources/tilesets/" + tilesetNameArray [i]);
 				importSheet = new Spritesheet ("resources/tilesets/" + tilesetNameArray [i]);
-				Sprite[] tempSheet = importSheet.toSpriteArray (16, 16);
+				Sprite[] tempSheet = importSheet.toSpriteArray (TILE_SIZE, TILE_SIZE);
 				//System.out.println(tempSheet.length);
 				for (int j = 0; j < tempSheet.length; j ++) {
 					tileSheet.add (tempSheet [j]);
@@ -1026,8 +1040,8 @@ public class Room {
 					if (hasVariants) {
 						obj.setVariantData (objectList [objId].split ("#")[1]);
 					}
-					obj.setX (objX * 16);
-					obj.setY (objY * 16);
+					obj.setX (objX * TILE_SIZE);
+					obj.setY (objY * TILE_SIZE);
 					toDeclare.add (obj);
 				} catch (InstantiationException e) {
 					// TODO Auto-generated catch block
