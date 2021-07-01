@@ -130,7 +130,7 @@ public class MapScreen extends GameObject {
 		
 		//Draw the image to the screen
 		Graphics wg = MainLoop.getWindow ().getBufferGraphics ();
-		wg.drawImage (renderImg, 0, 0, null);
+		//wg.drawImage (renderImg, 0, 0, null);
 		
 	}
 	

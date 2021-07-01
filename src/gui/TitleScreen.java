@@ -2,6 +2,7 @@ package gui;
 
 import java.awt.event.KeyEvent;
 
+import gameObjects.Player;
 import main.GameObject;
 import music.MusicPlayer;
 import pumkins.*;
@@ -23,6 +24,7 @@ public class TitleScreen extends GameObject {
 	public void frameEvent () {
 		if (mouseClicked () && getSprite () == bg) {
 			setSprite (gameplay);
+			this.setHidden (true);
 			mps.declare (0, 0);
 			for (int i = 0; i < 6; i++) {
 				new RedPumkin ().declare (16, 32 + i * 8);
@@ -32,6 +34,7 @@ public class TitleScreen extends GameObject {
 				new BluePumkin ().declare (48, 32 + i * 8);
 				new PurplePumkin ().declare (56, 32 + i * 8);
 			}
+			new Player ().declare (20, 20);
 		}
 	}
 	
