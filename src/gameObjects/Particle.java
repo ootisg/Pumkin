@@ -103,7 +103,7 @@ public class Particle extends GameObject {
 	public void draw () {
 		
 		int fadePoint = (int)((double)(FADE_START_POINT) * initialDurability);
-		Color c =Color.black;
+		Color c = color;
 		if (durability < fadePoint) {
 			double percentFade = ((double)durability / fadePoint);
 			int colorInt = (color.getAlpha () << 24) + (color.getRed () << 16) + (color.getGreen () << 8) + color.getBlue ();

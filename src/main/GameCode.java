@@ -30,9 +30,6 @@ public class GameCode extends GameAPI {
 			e.printStackTrace();
 		}
 		
-		//Start up the title screen
-		new TitleScreen ().declare (0, 0);
-		
 	}
 	public void gameLoop () {
 		getRoom ().frameEvent ();

@@ -17,13 +17,16 @@ public class Pumkin extends GameObject {
 	public static final int PUMKIN_AI_FOLLOW_PLAYER = 1;
 	public static final int PUMKIN_AI_FOLLOW_POINT = 2;
 	public static final int PUMKIN_AI_RUN_BETWEEN = 3;
+	public static final int PUMKIN_AI_THROW_TO = 4;
 	
 	public static final double PUMKIN_DEFAULT_SPEED = 1;
+	public static final double PUMKIN_THROW_SPEED = 10;
 	public static final double PUMKIN_GROUP_STRENGTH = .05;
 	public static final double PUMKIN_REPULSION_STRENGTH = 1;
 	public static final double PUMKIN_PERSONAL_SPACE = 8;
 	public static final double PUMKIN_GROUPING_DISTANCE = 50;
 	public static final double PUMKIN_STOP_DISTANCE = 25;
+	public static final double PUMKIN_DEST_DISTANCE = 16;
 	
 	private double speed;
 	
@@ -34,6 +37,7 @@ public class Pumkin extends GameObject {
 	private double destY;
 	private double fromX;
 	private double fromY;
+	private int throwFrames;
 	private boolean towardsDest;
 	
 	Vector2D scratch = new Vector2D (0, 0);
@@ -41,6 +45,8 @@ public class Pumkin extends GameObject {
 	public Pumkin () {
 		setParticleMaker (getDefaultPumkinParticleMaker ());
 		speed = PUMKIN_DEFAULT_SPEED;
+		currentAi = PUMKIN_AI_FOLLOW_PLAYER;
+		createHitbox (-2, -2, 4, 4);
 	}
 	
 	public ParticleMaker getDefaultPumkinParticleMaker () {
@@ -53,7 +59,6 @@ public class Pumkin extends GameObject {
 		pm.setSpeed (.25);
 		pm.setMinSize (1);
 		pm.setMaxSize (2);
-		goBetween (25, 25, 200, 100);
 		return pm;
 	}
 	
@@ -76,6 +81,9 @@ public class Pumkin extends GameObject {
 	@Override
 	public void frameEvent () {
 		doAIStep ();
+		if (isColliding (getPlayer ()) && currentAi == PUMKIN_AI_IDLE) {
+			followPlayer ();
+		}
 	}
 	
 	public void doAIStep () {
@@ -84,7 +92,7 @@ public class Pumkin extends GameObject {
 				//Do nothing
 				break;
 			case PUMKIN_AI_FOLLOW_PLAYER:
-				followAIStep (getMouseX (), getMouseY ());
+				followAIStep (getPlayer ().getCenterX (), getPlayer ().getCenterY ());
 				break;
 			case PUMKIN_AI_FOLLOW_POINT:
 				followAIStep (destX, destY);
@@ -102,10 +110,25 @@ public class Pumkin extends GameObject {
 				double distx = x2 - x1;
 				double disty = y2 - y1;
 				double dist = Math.sqrt (distx * distx + disty * disty);
-				if (dist < 32) {
+				if (dist < PUMKIN_DEST_DISTANCE) {
 					towardsDest = !towardsDest;
 				}
 				break;
+			case PUMKIN_AI_THROW_TO:
+				Vector2D throwVector = new Vector2D (destX - fromX, destY - fromY);
+				Vector2D currVector = new Vector2D (throwVector);
+				currVector.normalize ();
+				currVector.scale (throwFrames * PUMKIN_THROW_SPEED);
+				if (currVector.getLength () >= throwVector.getLength ()) {
+					setX (destX);
+					setY (destY);
+					throwFrames = 0;
+					idle ();
+				} else {
+					setX (fromX + currVector.x);
+					setY (fromY + currVector.y);
+					throwFrames++;
+				}
 			default:
 				break;
 		}
@@ -123,6 +146,14 @@ public class Pumkin extends GameObject {
 		ArrayList<GameObject> pumks = MainLoop.getObjectMatrix ().getAll (Pumkin.class);
 		for (int i = 0; i < pumks.size (); i++) {
 			Pumkin currPumk = (Pumkin)pumks.get (i);
+			//Adjust for 0 distance case
+			while (currPumk != this && currPumk.getX () == this.getX () && currPumk.getY () == this.getY ()) {
+				Vector2D vRand = new Vector2D (Math.random () * 2 - 2, Math.random () * 2 - 2);
+				vRand.normalize();
+				setX (getX () + vRand.x);
+				setY (getY () + vRand.y);
+			}
+			//Do pumkin things
 			Vector2D offs = new Vector2D (currPumk.getX () - getX (), currPumk.getY () - getY ());
 			double offsLength = offs.getLength ();
 			offs.normalize ();
@@ -157,6 +188,7 @@ public class Pumkin extends GameObject {
 	}
 	
 	public void goBetween (double xfrom, double yfrom, double xto, double yto) {
+		Thread.dumpStack();
 		currentAi = PUMKIN_AI_RUN_BETWEEN;
 		destX = xto;
 		destY = yto;
@@ -165,16 +197,28 @@ public class Pumkin extends GameObject {
 		towardsDest = true;
 	}
 	
+	public void throwTo (double xfrom, double yfrom, double xto, double yto) {
+		currentAi = PUMKIN_AI_THROW_TO;
+		destX = xto;
+		destY = yto;
+		fromX = xfrom;
+		fromY = yfrom;
+	}
+	
 	public void reverse () {
 		towardsDest = !towardsDest;
+	}
+	
+	public int getCurrentAi () {
+		return currentAi;
 	}
 	
 	@Override
 	public void draw () {
 		bodyParticle.makeParticle ((int)getX (), (int)getY ());
-		Graphics g = MainLoop.getWindow ().getBufferGraphics ();
+		/*Graphics g = MainLoop.getWindow ().getBufferGraphics ();
 		g.setColor (Color.BLACK);
-		g.fillRect ((int)getX (), (int)getY (), 2, 2);
+		g.fillRect ((int)getX (), (int)getY (), 2, 2);*/
 	}
 	
 }

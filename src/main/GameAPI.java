@@ -7,7 +7,7 @@ import map.Room;
 public abstract class GameAPI {
 	private static final Room room = new Room (); //Makes the static instance of the room object
 	private static final Gui gui = new Gui ();
-	private static final Player player = new Player ();
+	private static Player player;
 	private static final SaveFile activeSave = new SaveFile ();
 	public boolean keyCheck (int keyCode) {
 		//Returns true if the key with an ASCII code of keyCode is pressed down
@@ -76,6 +76,9 @@ public abstract class GameAPI {
 		return gui;
 	}
 	public static Player getPlayer () {
+		if (player == null) {
+			player = (Player) MainLoop.getObjectMatrix ().get ("gameObjects.Player", 0);
+		}
 		return player;
 	}
 	public static GameWindow getWindow () {

@@ -20,7 +20,8 @@ public class TitleScreen extends GuiComponent {
 	
 	@Override
 	public void frameEvent () {
-		if (mouseClicked () && getSprite () == bg) {
+		if (mouseButtonClicked (1) && getSprite () == bg) {
+			setSprite (gameplay);
 			for (int i = 0; i < 6; i++) {
 				new RedPumkin ().declare (16, 32 + i * 8);
 				new OrangePumkin ().declare (24, 32 + i * 8);
@@ -29,7 +30,7 @@ public class TitleScreen extends GuiComponent {
 				new BluePumkin ().declare (48, 32 + i * 8);
 				new PurplePumkin ().declare (56, 32 + i * 8);
 			}
-			new Player ().declare (20, 20);
+			new Player ().declare (128, 64);
 			forget ();
 		}
 	}
